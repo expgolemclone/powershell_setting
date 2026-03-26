@@ -90,3 +90,15 @@ function Invoke-Tree {
 }
 
 Set-Alias -Name tree -Value Invoke-Tree
+
+$readableWhite = $PSStyle.Foreground.White
+
+$PSStyle.FileInfo.Directory = $readableWhite
+$PSStyle.FileInfo.SymbolicLink = $readableWhite
+
+if (Get-Module -ListAvailable -Name PSReadLine) {
+    Set-PSReadLineOption -Colors @{
+        String  = "White"
+        Comment = "`e[36m"
+    }
+}
