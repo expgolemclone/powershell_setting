@@ -9,6 +9,7 @@ Set-Alias -Name n -Value nvim
 function Invoke-Claude { claude --effort max @args }
 Set-Alias -Name cl -Value Invoke-Claude
 Set-Alias -Name co -Value codex
+Set-Alias -Name t -Value todoist
 
 function Invoke-GlowDark {
     glow --style dark @args
