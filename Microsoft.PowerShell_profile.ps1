@@ -6,7 +6,8 @@ function Invoke-ClearLs {
 Set-Alias -Name l -Value Invoke-ClearLs
 Set-Alias -Name c -Value Clear-Host
 Set-Alias -Name n -Value nvim
-Set-Alias -Name cl -Value claude
+function Invoke-Claude { claude --effort max @args }
+Set-Alias -Name cl -Value Invoke-Claude
 Set-Alias -Name co -Value codex
 
 function Invoke-ListAll {
