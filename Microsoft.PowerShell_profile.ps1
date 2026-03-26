@@ -10,6 +10,12 @@ function Invoke-Claude { claude --effort max @args }
 Set-Alias -Name cl -Value Invoke-Claude
 Set-Alias -Name co -Value codex
 
+function Invoke-GlowDark {
+    glow --style dark @args
+}
+
+Set-Alias -Name g -Value Invoke-GlowDark
+
 function Invoke-ListAll {
     Get-ChildItem -Force @args
 }
