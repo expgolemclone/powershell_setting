@@ -1,3 +1,8 @@
+$localBin = "$env:USERPROFILE\.local\bin"
+if ($env:PATH -notlike "*$localBin*") {
+    $env:PATH = "$localBin;$env:PATH"
+}
+
 function Invoke-ClearLs {
     Clear-Host
     Get-ChildItem
