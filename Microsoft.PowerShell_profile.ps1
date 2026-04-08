@@ -109,3 +109,8 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
         Comment = "`e[36m"
     }
 }
+
+function prompt {
+    $Host.UI.RawUI.WindowTitle = $PWD.Path
+    "PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) "
+}
