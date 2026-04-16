@@ -1,8 +1,3 @@
-$localBin = "$env:USERPROFILE\.local\bin"
-if ($env:PATH -notlike "*$localBin*") {
-    $env:PATH = "$localBin;$env:PATH"
-}
-
 function Invoke-ClearLs {
     Clear-Host
     Get-ChildItem
@@ -16,6 +11,8 @@ Set-Alias -Name cl -Value Invoke-Claude
 Set-Alias -Name co -Value codex
 function Invoke-ClearTodoist { Clear-Host; todoist @args }
 Set-Alias -Name t -Value Invoke-ClearTodoist
+function Invoke-UvRunPython { uv run python @args }
+Set-Alias -Name u -Value Invoke-UvRunPython
 
 function Invoke-GlowDark {
     glow --style dark @args
