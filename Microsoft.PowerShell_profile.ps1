@@ -3,6 +3,19 @@ function Invoke-ClearLs {
     Get-ChildItem
 }
 
+if ($IsWindows) {
+    # Keep the console code page and PowerShell encodings aligned on UTF-8.
+    try {
+        & "$env:SystemRoot\System32\chcp.com" 65001 > $null
+    } catch {
+    }
+
+    $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+    [Console]::InputEncoding = $utf8NoBom
+    [Console]::OutputEncoding = $utf8NoBom
+    $OutputEncoding = $utf8NoBom
+}
+
 Set-Alias -Name l -Value Invoke-ClearLs
 Set-Alias -Name c -Value Clear-Host
 Set-Alias -Name n -Value nvim
@@ -13,6 +26,7 @@ function Invoke-ClearTodoist { Clear-Host; todoist @args }
 Set-Alias -Name t -Value Invoke-ClearTodoist
 function Invoke-UvRunPython { uv run python @args }
 Set-Alias -Name u -Value Invoke-UvRunPython
+Set-Alias -Name sudo -Value gsudo
 
 function Invoke-GlowDark {
     glow --style dark @args

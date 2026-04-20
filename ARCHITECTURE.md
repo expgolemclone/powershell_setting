@@ -32,3 +32,4 @@ PowerShell プロファイルおよびカスタムモジュールのリポジト
 | `u` | `uv run python` |
 | `g` | `glow --style dark` |
 | `tree` | カスタム Tree 実装 |
+| `sudo` | `gsudo` |
