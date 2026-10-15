@@ -8,9 +8,7 @@ PowerShell loads the profile only from its standard directory. Connect that dire
 pwsh -NoProfile -File .\setup.ps1
 ```
 
-The script creates a directory junction at the parent directory of `$PROFILE.CurrentUserCurrentHost`. Running it again is a no-op while the junction is correct.
-
-A junction does not follow the repository when it is moved. After moving this repository again, run `setup.ps1` from its new location. The script may replace a real profile directory tree only when it contains no files or reparse points, or replace a stale junction whose previous target no longer exists. It refuses to overwrite user files or a junction with another live target.
+The script creates a directory junction to this repository. Rerun it after moving the repository. It refuses to overwrite user files or a junction with another live target.
 
 Run profile regression tests with `Invoke-Pester -Path ./tests -EnableExit` in PowerShell 7.
 
