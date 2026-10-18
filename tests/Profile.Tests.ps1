@@ -11,11 +11,11 @@ Describe 'PowerShell profile' {
         @($parseErrors).Count | Should -Be 0
     }
 
-    It 'uses standard Pi and Codex shims, with p forwarding arguments and input to Pi' {
+    It 'uses native Pi, Codex and uv shims with argument and input forwarding through p and u' {
         # Stand-ins for npm-generated scripts, without starting a CLI or model.
         $shimDirectory = Join-Path $TestDrive 'agent-shims'
         New-Item -ItemType Directory -Path $shimDirectory | Out-Null
-        foreach ($name in @('pi', 'codex')) {
+        foreach ($name in @('pi', 'codex', 'uv')) {
             Set-Content -LiteralPath (Join-Path $shimDirectory "$name.ps1") -Value @'
 [pscustomobject]@{ Arguments = @($args); Incoming = @($input) }
 '@
@@ -26,14 +26,15 @@ $env:PATH = $args[1] + [IO.Path]::PathSeparator + $env:PATH
 . $args[0]
 . $args[0]
 if ((Get-Alias p).Definition -ne 'pi') { throw 'p must resolve to pi' }
-foreach ($name in @('pi', 'codex')) {
+if ((Get-Alias u).Definition -ne 'uv') { throw 'u must resolve directly to uv' }
+foreach ($name in @('pi', 'codex', 'uv')) {
     $command = Get-Command $name
     if ($command.CommandType -ne 'ExternalScript' -or
         $command.Source -ne (Join-Path $args[1] "$name.ps1")) {
         throw "$name did not resolve to its standard shim"
     }
 }
-foreach ($name in @('pi', 'p', 'codex')) {
+foreach ($name in @('pi', 'p', 'codex', 'uv', 'u')) {
     $result = & $name --help '--' 'two words' '"quoted"' ''
     $expected = @('--help', '--', 'two words', '"quoted"', '')
     $actualJson = ConvertTo-Json -InputObject $result.Arguments -Compress
@@ -47,6 +48,11 @@ foreach ($name in @('pi', 'p', 'codex')) {
 '@
         & pwsh -NoProfile -Command "& { $check } '$($profilePath.Replace("'", "''"))' '$($shimDirectory.Replace("'", "''"))'"
         $LASTEXITCODE | Should -Be 0
+    }
+
+    It 'does not reconstruct PATH or recreate the aggregate Python launcher' {
+        $source = [IO.File]::ReadAllText($profilePath)
+        $source | Should -Not -Match 'envx-python|Invoke-ProjectPython|GetEnvironmentVariable|env:Path\s*='
     }
 
     It 'does not register the retired launcher or aliases' {

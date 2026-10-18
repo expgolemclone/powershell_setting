@@ -1,41 +1,3 @@
-# >>> kintone managed PATH sync >>>
-# Managed by kintone setup.ps1. Keeps PATH aligned with the latest User and Machine registry values.
-# Preserve process-level PATH entries first so agent-injected runtimes keep precedence.
-$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
-$machinePath = [Environment]::GetEnvironmentVariable('Path', 'Machine')
-$seenPathEntries = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
-$mergedPathEntries = [System.Collections.Generic.List[string]]::new()
-
-foreach ($sourcePath in @($env:Path, $userPath, $machinePath)) {
-    if ([string]::IsNullOrWhiteSpace($sourcePath)) {
-        continue
-    }
-
-    foreach ($pathPart in ($sourcePath -split ';')) {
-        $normalizedPathPart = $pathPart.Trim().Trim('"')
-        if ([string]::IsNullOrWhiteSpace($normalizedPathPart)) {
-            continue
-        }
-
-        do {
-            $trimmedPathPart = [System.IO.Path]::TrimEndingDirectorySeparator($normalizedPathPart)
-            if ($trimmedPathPart -eq $normalizedPathPart) {
-                break
-            }
-            $normalizedPathPart = $trimmedPathPart
-        } while ($true)
-
-        if ($seenPathEntries.Add($normalizedPathPart)) {
-            $mergedPathEntries.Add($normalizedPathPart)
-        }
-    }
-}
-
-if ($mergedPathEntries.Count -gt 0) {
-    $env:Path = $mergedPathEntries -join ';'
-}
-# <<< kintone managed PATH sync <<<
-
 function Invoke-ClearLs {
     Clear-Host
     Get-ChildItem
@@ -59,12 +21,7 @@ Set-Alias -Name l -Value Invoke-ClearLs
 Set-Alias -Name c -Value Clear-Host
 Set-Alias -Name n -Value nvim
 Set-Alias -Name p -Value pi
-function Invoke-SharedPython {
-    $python = Join-Path $env:LOCALAPPDATA 'envx/runtimes/python/Scripts/python.exe'
-    if (-not (Test-Path -LiteralPath $python -PathType Leaf)) { throw "Shared Python is not installed: $python" }
-    & $python @args
-}
-Set-Alias -Name u -Value Invoke-SharedPython
+Set-Alias -Name u -Value uv
 Set-Alias -Name sudo -Value gsudo
 Set-Alias -Name m -Value mdcat
 
