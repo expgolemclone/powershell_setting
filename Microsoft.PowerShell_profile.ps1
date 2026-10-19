@@ -218,3 +218,5 @@ function prompt {
     $out += "PS $loc$('>' * ($nestedPromptLevel + 1)) "
     return $out
 }
+
+(& mise.exe activate pwsh) | Out-String | Invoke-Expression

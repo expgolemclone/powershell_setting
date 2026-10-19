@@ -22,9 +22,9 @@ Describe 'PowerShell profile' {
         }
         $check = @'
 $ErrorActionPreference = 'Stop'
+. $args[0]
+. $args[0]
 $env:PATH = $args[1] + [IO.Path]::PathSeparator + $env:PATH
-. $args[0]
-. $args[0]
 if ((Get-Alias p).Definition -ne 'pi') { throw 'p must resolve to pi' }
 if ((Get-Alias u).Definition -ne 'uv') { throw 'u must resolve directly to uv' }
 foreach ($name in @('pi', 'codex', 'uv')) {
@@ -47,6 +47,34 @@ foreach ($name in @('pi', 'p', 'codex', 'uv', 'u')) {
 }
 '@
         & pwsh -NoProfile -Command "& { $check } '$($profilePath.Replace("'", "''"))' '$($shimDirectory.Replace("'", "''"))'"
+        $LASTEXITCODE | Should -Be 0
+    }
+
+    It 'activates mise tools and project environment changes while preserving the custom prompt' {
+        $project = Join-Path $TestDrive 'mise-project'
+        New-Item -ItemType Directory -Path $project | Out-Null
+        Set-Content -LiteralPath (Join-Path $project 'mise.toml') -Value "[env]`nPROFILE_MISE_TEST = 'project-only'"
+        $check = @'
+$ErrorActionPreference = 'Stop'
+. $args[0]
+. $args[0]
+foreach ($name in @('node', 'python', 'pi', 'uv')) {
+    if ((Split-Path (Get-Command $name).Source) -ne (Split-Path (& mise.exe which $name))) { throw "Not selected by mise: $name" }
+}
+if ((prompt) -notmatch 'PS .+>+ $') { throw 'Custom prompt was replaced' }
+& mise.exe trust (Join-Path $args[1] 'mise.toml')
+if ($LASTEXITCODE) { throw 'Could not trust the test configuration' }
+Push-Location -LiteralPath $args[1]
+try {
+    if ($env:PROFILE_MISE_TEST -ne 'project-only') { throw 'Project environment was not activated on directory change' }
+    if ((prompt) -notmatch 'PS .+>+ $') { throw 'Project activation replaced the prompt' }
+} finally {
+    Pop-Location
+    & mise.exe untrust (Join-Path $args[1] 'mise.toml')
+}
+if (Test-Path Env:PROFILE_MISE_TEST) { throw 'Project environment leaked after leaving the directory' }
+'@
+        & pwsh -NoProfile -Command "& { $check } '$($profilePath.Replace("'", "''"))' '$($project.Replace("'", "''"))'"
         $LASTEXITCODE | Should -Be 0
     }
 
